@@ -1,0 +1,91 @@
+import sys
+from io import StringIO
+
+
+def import_and_run_task2():
+    """Helper function to import task2 and capture output"""
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    
+    try:
+        if 'task2' in sys.modules:
+            del sys.modules['task2']
+        import task2  # Just import task2, no s.py needed
+        output = sys.stdout.getvalue()
+        return task2, output
+    except Exception as e:
+        return None, ""
+    finally:
+        sys.stdout = old_stdout
+
+
+def test_01_allowance_variable_exists():
+    """Test that allowance variable exists"""
+    task2, output = import_and_run_task2()
+    assert task2 is not None, "Could not import task2.py"
+    assert hasattr(task2, 'allowance'), "Missing required variable: allowance"
+
+
+def test_02_allowance_final_value():
+    """Test final allowance value - 3 points"""
+    task2, output = import_and_run_task2()
+    expected_final = 8.5
+    
+    if task2:
+        assert task2.allowance == expected_final, f"allowance has incorrect final value. Expected {expected_final}, got {task2.allowance}"
+
+
+def test_03_output_contains_final_value():
+    """Test output contains final allowance - 2 points"""
+    task2, output = import_and_run_task2()
+    assert "8.5" in output or "8.50" in output, "Output doesn't contain final allowance value"
+
+
+def test_04_output_has_dollar_sign():
+    """Test output contains dollar sign - 1 point"""
+    task2, output = import_and_run_task2()
+    assert "$" in output, "Output should contain dollar sign ($)"
+
+
+def test_05_output_label_correct():
+    """Test output contains 'Allowance:' label - 1 point"""
+    task2, output = import_and_run_task2()
+    assert "Allowance:" in output, "Output should contain 'Allowance:' label"
+
+
+def test_06_no_hardcoding():
+    """Test with different input values to detect hard-coding - 3 points"""
+    task2, output = import_and_run_task2()
+    if task2 is None:
+        return
+    
+    # Read and modify the student's code
+    with open('task2.py', 'r') as f:
+        code = f.read()
+    
+    # Replace with test dataset
+    modified_code = code.replace('allowance = 15', 'allowance = 20')
+    modified_code = modified_code.replace('room = 5', 'room = 6')
+    modified_code = modified_code.replace('soda = 2', 'soda = 3')
+    modified_code = modified_code.replace('movie = 10', 'movie = 12')
+    
+    # Execute modified code and capture output
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    
+    try:
+        namespace = {}
+        exec(modified_code, namespace)
+        output = sys.stdout.getvalue()
+    except Exception as e:
+        assert False, f"Code failed with test data: {e}"
+    finally:
+        sys.stdout = old_stdout
+    
+    # Expected: 20 + 2 + 6 - 3 = 25, * 2 = 50, + 4 = 54, - 12 = 42, / 4 = 10.5
+    expected_final = 10.5
+    
+    if 'allowance' in namespace:
+        assert namespace['allowance'] == expected_final, f"Hard-coding detected. Expected {expected_final}, got {namespace['allowance']}"
+    
+    assert "10.5" in output or "10.50" in output, "Hard-coding detected in output"
