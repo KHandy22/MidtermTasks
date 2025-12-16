@@ -1,0 +1,170 @@
+import sys
+from io import StringIO
+from unittest.mock import patch
+
+
+def import_and_run_task3():
+    """Helper function to import task3 and capture output"""
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    
+    try:
+        if 'task3' in sys.modules:
+            del sys.modules['task3']
+        
+        # Mock input to provide test values
+        with patch('builtins.input', side_effect=["Crystal Ball", "39.99", "2"]):
+            import task3
+            output = sys.stdout.getvalue()
+            return task3, output
+    except Exception as e:
+        return None, ""
+    finally:
+        sys.stdout = old_stdout
+
+
+def test_01_get_purchase_info_function_exists():
+    """Test that get_purchase_info function exists - 1 point"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'get_purchase_info'), "Missing required function: get_purchase_info"
+    assert callable(task3.get_purchase_info), "get_purchase_info must be a function"
+
+
+def test_02_item_variable_exists():
+    """Test that item variable exists - 1 point"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'item'), "Missing required variable: item"
+
+
+def test_03_price_variable_exists():
+    """Test that price variable exists - 1 point"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'price'), "Missing required variable: price"
+
+
+def test_04_quantity_variable_exists():
+    """Test that quantity variable exists - 1 point"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'quantity'), "Missing required variable: quantity"
+
+
+def test_05_subtotal_variable_exists():
+    """Test that subtotal variable exists"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'subtotal'), "Missing required variable: subtotal"
+
+
+def test_06_tax_variable_exists():
+    """Test that tax variable exists"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'tax'), "Missing required variable: tax"
+
+
+def test_07_total_variable_exists():
+    """Test that total variable exists"""
+    task3, output = import_and_run_task3()
+    assert task3 is not None, "Could not import task3.py"
+    assert hasattr(task3, 'total'), "Missing required variable: total"
+
+
+def test_08_subtotal_value():
+    """Test subtotal calculation - 2 points"""
+    task3, output = import_and_run_task3()
+    expected_subtotal = 79.98
+    assert task3 is not None, "Could not import task3.py"
+    assert task3.subtotal == expected_subtotal, f"subtotal has incorrect value. Expected {expected_subtotal}, got {task3.subtotal}"
+
+
+def test_09_tax_value():
+    """Test tax calculation - 2 points"""
+    task3, output = import_and_run_task3()
+    expected_tax = 7.5981
+    assert task3 is not None, "Could not import task3.py"
+    assert abs(task3.tax - expected_tax) < 0.0001, f"tax has incorrect value. Expected approximately {expected_tax}, got {task3.tax}"
+
+
+def test_10_total_value():
+    """Test total calculation and rounding - 2 points"""
+    task3, output = import_and_run_task3()
+    expected_total = 87.58
+    assert task3 is not None, "Could not import task3.py"
+    assert task3.total == expected_total, f"total has incorrect value. Expected {expected_total}, got {task3.total}"
+
+
+def test_11_menu_displayed():
+    """Test that menu is displayed - 1 point"""
+    task3, output = import_and_run_task3()
+    assert "PECULIAR EMPORIUM" in output, "Menu header not displayed"
+    assert "Crystal Ball" in output, "Menu items not displayed"
+
+
+def test_12_receipt_line_displayed():
+    """Test receipt shows item line - 1 point"""
+    task3, output = import_and_run_task3()
+    assert "x2" in output, "Receipt should show quantity"
+    assert "39.99" in output, "Receipt should show item price"
+
+
+def test_13_subtotal_displayed():
+    """Test subtotal is displayed - 1 point"""
+    task3, output = import_and_run_task3()
+    assert "Subtotal:" in output, "Subtotal label missing"
+    assert "79.98" in output, "Subtotal value missing"
+
+
+def test_14_tax_displayed():
+    """Test tax is displayed - 1 point"""
+    task3, output = import_and_run_task3()
+    assert "Tax:" in output, "Tax label missing"
+
+
+def test_15_total_displayed():
+    """Test total is displayed - 1 point"""
+    task3, output = import_and_run_task3()
+    assert "Total:" in output, "Total label missing"
+    assert "87.58" in output, "Total value missing"
+
+
+def test_16_no_hardcoding():
+    """Test with different input values to detect hard-coding - 3 points"""
+    task3, output = import_and_run_task3()
+    if task3 is None:
+        return
+    
+    # Read and modify the student's code
+    with open('task3.py', 'r') as f:
+        code = f.read()
+    
+    # No replacements needed - just use different inputs
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+    
+    try:
+        # Mock different input values
+        with patch('builtins.input', side_effect=["Phoenix Feather", "14.99", "5"]):
+            namespace = {}
+            exec(code, namespace)
+            output = sys.stdout.getvalue()
+    except Exception as e:
+        assert False, f"Code failed with test data: {e}"
+    finally:
+        sys.stdout = old_stdout
+    
+    # Expected: 14.99 * 5 = 74.95, tax = 74.95 * 0.095 = 7.12025, total = 82.07
+    expected_subtotal = 74.95
+    expected_total = 82.07
+    
+    if 'subtotal' in namespace:
+        assert namespace['subtotal'] == expected_subtotal, f"Hard-coding detected. Expected subtotal {expected_subtotal}, got {namespace['subtotal']}"
+    
+    if 'total' in namespace:
+        assert namespace['total'] == expected_total, f"Hard-coding detected. Expected total {expected_total}, got {namespace['total']}"
+    
+    assert "74.95" in output, "Hard-coding detected in output"
+    assert "82.07" in output, "Hard-coding detected in output"
