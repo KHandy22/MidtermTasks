@@ -1,5 +1,5 @@
 import sys
-from io import StringIO
+from io import StringIO 
 
 
 def import_and_run_task1():
